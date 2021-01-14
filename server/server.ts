@@ -27,15 +27,15 @@ const connectClient = async () => {
     }
     finally {
         await client.end();
-        console.log("client disconnected")
+        console.log("client disconnected");
     }
 }
 
 server.get('/', function (req, res) {
-    res.send('Hello Doortje123');
-    connectClient();
+    console.log('homepage');
 });
 
 server.listen(3000, function () {
-    console.log('App is listening on port 3000');
+    console.log('App is listening on port 3000!');
+    connectClient();
 });

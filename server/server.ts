@@ -7,6 +7,7 @@ const server = express();
 server.use(express.urlencoded({ extended: false })); // make variables from form accessible in the POST request object
 
 import addNewUser from "./database/addNewUser";
+import { Result } from "./result";
 
 const DbPool = new Pool({
     user: process.env.DB_USER,
@@ -41,8 +42,16 @@ server.get('/', function (req, res) {
 
 server.post('/register', async (req, res, next) => {
     console.log("POSTED")
-    addNewUser(DbPool, req, res, next);
-    res.redirect('/');
+    const result: Result<string, string> = await addNewUser(DbPool, req, res, next);
+
+    if (result.isOk()) {
+        console.log("succes: " + result.getResult());
+        res.redirect('/');
+    }
+    else {
+        console.log("error: " + result.getResult());
+        res.redirect('/register');
+    }
 })
 
 server.listen(5000, function () {

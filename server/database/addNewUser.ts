@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
+import { error, ok } from "../result"
 
 const addNewUser = async (dbPool, req, res, next) => {
     const emailAlreadyExists = await doesEmailAlreadyExist(dbPool, req.body.email);
 
     if (emailAlreadyExists) {
-        console.log('email already exists');
-        return;
+        return error("User email already exists");
     }
 
     try {
@@ -20,10 +20,12 @@ const addNewUser = async (dbPool, req, res, next) => {
             await client.query("INSERT INTO users values($1, $2, $3)", [userId, email, hashedPassword]);
             console.log('INSERT INTO users');
             await client.query("COMMIT");
+            return ok("User added to db");
         }
         catch (error) {
             console.log(`Failed to execute query : ${error}`);
             await client.query("ROLLBACK");
+            return error("Failed executing query");
         }
         finally {
             await client.release();
@@ -32,6 +34,7 @@ const addNewUser = async (dbPool, req, res, next) => {
     }
     catch (error) {
         console.log('Error while connecting to database: ' + error);
+        return error("Failed to connect to the database");
     }
 }
 
